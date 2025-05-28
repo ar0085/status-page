@@ -2,20 +2,40 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import socketio
 import os
+import logging
 
 from app.routes import services, incidents, organizations, public, maintenance, team
 from app.websocket import sio
-from app.models.base import Base
-from app.db.session import engine
+from app.core.config import settings
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+# Configure logging
+logging.basicConfig(
+    level=getattr(logging, settings.LOG_LEVEL.upper()),
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Status Page API",
     description="Multi-tenant status page application API",
     version="1.0.0",
 )
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize database on startup"""
+    logger.info(f"🚀 Starting Status Page API in {settings.ENVIRONMENT} mode")
+
+    try:
+        from app.db.init_db import init_database
+
+        init_database()
+    except Exception as e:
+        logger.error(f"❌ Failed to initialize database: {e}")
+        if settings.ENVIRONMENT == "production":
+            raise
+
 
 # Configure CORS for both development and production
 allowed_origins = [
@@ -25,14 +45,14 @@ allowed_origins = [
 ]
 
 # Add production frontend URL if available
-frontend_url = os.getenv("FRONTEND_URL")
-if frontend_url:
-    allowed_origins.append(frontend_url)
+if settings.FRONTEND_URL:
+    allowed_origins.append(settings.FRONTEND_URL)
 
 # Add custom origins from environment
-custom_origins = os.getenv("ALLOWED_ORIGINS", "")
-if custom_origins:
-    allowed_origins.extend(custom_origins.split(","))
+if settings.ALLOWED_ORIGINS:
+    allowed_origins.extend(settings.ALLOWED_ORIGINS.split(","))
+
+logger.info(f"🌐 CORS allowed origins: {allowed_origins}")
 
 app.add_middleware(
     CORSMiddleware,
@@ -61,7 +81,13 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "environment": settings.ENVIRONMENT,
+        "database_url_configured": bool(
+            settings.DATABASE_URL or settings.db_host != "localhost"
+        ),
+    }
 
 
 # Export the socket app as the main app for uvicorn

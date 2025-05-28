@@ -8,8 +8,8 @@ echo "🚀 Starting backend build process..."
 echo "📦 Installing Python dependencies..."
 pip install -r requirements.txt
 
-# Run database migrations
-echo "🗄️ Running database migrations..."
-alembic upgrade head
+# Note: Database migrations are now handled at application startup
+# This prevents build failures when database is not available during build time
+echo "ℹ️  Database migrations will be handled at application startup"
 
 echo "✅ Backend build completed successfully!" 
