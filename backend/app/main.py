@@ -52,15 +52,27 @@ if settings.FRONTEND_URL:
 if settings.ALLOWED_ORIGINS:
     allowed_origins.extend(settings.ALLOWED_ORIGINS.split(","))
 
-logger.info(f"🌐 CORS allowed origins: {allowed_origins}")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# For production, be more permissive with HTTPS origins
+if settings.ENVIRONMENT == "production":
+    # Allow all HTTPS origins (more secure than wildcards)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"https://.*\.onrender\.com",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    logger.info("🌐 CORS configured for production with HTTPS Render domains")
+else:
+    # Development - use specific origins
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    logger.info(f"🌐 CORS allowed origins: {allowed_origins}")
 
 # Include API routes
 app.include_router(services.router, prefix="/api")
