@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { socket } from "../lib/socket";
+import { socket } from "../lib/socket.ts";
 
 const WebSocketTest = () => {
   const [isConnected, setIsConnected] = useState(false);

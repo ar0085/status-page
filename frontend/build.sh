@@ -8,12 +8,12 @@ echo "🚀 Starting frontend build process..."
 echo "📦 Installing Node.js dependencies..."
 npm ci --production=false
 
-# Build the React application (with fallback)
+# Build the React application (try regular build first, then safe build)
 echo "🏗️ Building React application..."
 
-# Try the full build first, if it fails, use the safe build
+# Try the regular build first, if it fails, use the safe build
 npm run build || {
-    echo "⚠️  TypeScript compilation failed, using safe build..."
+    echo "⚠️  Regular build failed, trying safe build..."
     npm run build:safe
 }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
-import { routes } from "../../lib/routes";
+import { routes } from "../../lib/routes.ts";
 
 interface InvitationDetails {
   email: string;
