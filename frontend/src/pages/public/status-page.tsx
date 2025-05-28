@@ -9,8 +9,8 @@ import {
   Info,
   Calendar,
 } from "lucide-react";
-import { api } from "../../lib/api.ts";
-import { socket } from "../../lib/socket.ts";
+import { api } from "../../lib/api";
+import { socket } from "../../lib/socket";
 import type { StatusPageResponse, ServiceStatus } from "../../types";
 
 const StatusPage = () => {

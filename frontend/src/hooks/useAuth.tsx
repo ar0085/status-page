@@ -1,6 +1,6 @@
 import { useAuth as useClerkAuth } from "@clerk/clerk-react";
 import { useEffect } from "react";
-import { api } from "../lib/api.ts";
+import { api } from "../lib/api";
 
 export function useAuth() {
   const { getToken, isSignedIn, userId } = useClerkAuth();
