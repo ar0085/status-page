@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: status-page-backend
+    env: python
+    repo: https://github.com/yourusername/status-page.git # Replace with your GitHub repo URL
+    rootDir: ./backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    plan: free # Change to 'starter' for production
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.16
+      - key: DATABASE_URL
+        fromDatabase:
+          name: status-page-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLERK_SECRET_KEY
+        sync: false # You'll set this manually
+    healthCheckPath: /health
