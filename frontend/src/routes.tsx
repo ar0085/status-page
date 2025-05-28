@@ -14,7 +14,7 @@ import IncidentsDashboard from "./pages/dashboard/incidents";
 import MaintenanceDashboard from "./pages/dashboard/maintenance";
 import TeamManagement from "./pages/dashboard/team";
 import CreateOrganization from "./pages/dashboard/create-organization";
-import { routes } from "./lib/routes";
+import { routes } from "./lib/routes.ts";
 
 const AppRoutes = () => {
   return (

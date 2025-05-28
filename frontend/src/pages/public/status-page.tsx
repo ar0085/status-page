@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import {
@@ -9,8 +9,8 @@ import {
   Info,
   Calendar,
 } from "lucide-react";
-import { api } from "../../lib/api";
-import { socket } from "../../lib/socket";
+import { api } from "../../lib/api.ts";
+import { socket } from "../../lib/socket.ts";
 import type { StatusPageResponse, ServiceStatus } from "../../types";
 
 const StatusPage = () => {

@@ -6,14 +6,6 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
-    alias: [
-      { find: "@", replacement: "/src" },
-      { find: "@/lib", replacement: "/src/lib" },
-      { find: "@/components", replacement: "/src/components" },
-      { find: "@/hooks", replacement: "/src/hooks" },
-      { find: "@/types", replacement: "/src/types" },
-      { find: "@/pages", replacement: "/src/pages" },
-    ],
   },
   build: {
     sourcemap: false,
