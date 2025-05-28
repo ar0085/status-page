@@ -82,13 +82,18 @@ def run_migrations():
 def ensure_models_imported():
     """Ensure all models are imported for SQLAlchemy metadata."""
     try:
-        # Import all models to register them with SQLAlchemy
-        from app.models.user import User
-        from app.models.organization import Organization
-        from app.models.service import Service
-        from app.models.incident import Incident, IncidentUpdate
-        from app.models.maintenance import Maintenance
-        from app.models.invitation import Invitation
+        # Import all models from organization.py - they're all defined there
+        from app.models.organization import (
+            User,
+            Organization,
+            Service,
+            Incident,
+            IncidentUpdate,
+            Maintenance,
+            Invitation,
+            incident_services,
+            maintenance_services,
+        )
 
         logger.info("✅ All models imported successfully")
     except ImportError as e:
