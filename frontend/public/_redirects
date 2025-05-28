@@ -1,0 +1,3 @@
+# Single Page Application fallback
+# All routes should fall back to index.html for React Router to handle
+/*    /index.html   200 
