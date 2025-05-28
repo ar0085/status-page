@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc --project tsconfig.build.json && vite build",
+    "build:safe": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },

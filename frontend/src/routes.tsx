@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import { SignIn, SignUp } from "@clerk/clerk-react";
 import { Suspense } from "react";
