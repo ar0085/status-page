@@ -27,7 +27,9 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Only ignore Python lib directories, not our frontend TypeScript lib
+backend/lib/
+**/site-packages/
 lib64/
 parts/
 sdist/
