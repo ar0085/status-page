@@ -2,17 +2,17 @@ services:
   - type: static
     name: status-page-frontend
     env: static
-    repo: https://github.com/yourusername/status-page.git # Replace with your GitHub repo URL
+    repo: https://github.com/ar0085/status-page.git # Correct GitHub repo URL
     rootDir: ./frontend
     buildCommand: "npm ci && npm run build:safe"
     publishDir: ./dist
     pullRequestPreviewsEnabled: false
     envVars:
       - key: VITE_CLERK_PUBLISHABLE_KEY
-        sync: false # Set this manually in Render dashboard
+        sync: false # Set this manually in Render dashboard with PRODUCTION key
       - key: VITE_API_URL
-        value: https://status-page-backend.onrender.com # Replace with your backend URL
+        value: https://status-page-backend-cx26.onrender.com # Correct backend URL
       - key: VITE_SOCKET_URL
-        value: https://status-page-backend.onrender.com # Replace with your backend URL
+        value: https://status-page-backend-cx26.onrender.com # Correct backend URL
       - key: VITE_ENVIRONMENT
         value: production

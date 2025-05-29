@@ -37,6 +37,20 @@ async def startup_event():
         else:
             logger.warning("⚠️ Database initialization had issues - check logs above")
 
+        # Set up demo data in production (one-time only)
+        if settings.ENVIRONMENT == "production" and settings.CREATE_DEMO_DATA:
+            from app.services.demo_setup import setup_demo_data, check_demo_data_exists
+
+            if not check_demo_data_exists():
+                logger.info("🎭 Creating demo data for production...")
+                demo_success = setup_demo_data()
+                if demo_success:
+                    logger.info("✅ Demo data created successfully!")
+                else:
+                    logger.warning("⚠️ Demo data creation had issues")
+            else:
+                logger.info("📊 Demo data already exists, skipping creation")
+
     except Exception as e:
         logger.error(f"❌ Startup database initialization failed: {e}")
         # Don't crash the app in production - let it start and handle DB issues gracefully
@@ -174,6 +188,45 @@ async def debug_organizations():
             db.close()
     except Exception as e:
         return {"error": f"Failed to fetch organizations: {str(e)}"}
+
+
+@app.post("/admin/setup-demo-data")
+async def setup_demo_data_endpoint():
+    """Manual endpoint to create demo data."""
+    try:
+        from app.services.demo_setup import setup_demo_data, check_demo_data_exists
+
+        if check_demo_data_exists():
+            return {
+                "status": "info",
+                "message": "Demo data already exists",
+                "demo_links": [
+                    "https://status-page-frontend.onrender.com/status/demo-org",
+                    "https://status-page-frontend.onrender.com/status/test-company",
+                ],
+            }
+
+        logger.info("🎭 Manual demo data creation triggered")
+        success = setup_demo_data()
+
+        if success:
+            return {
+                "status": "success",
+                "message": "Demo data created successfully",
+                "demo_links": [
+                    "https://status-page-frontend.onrender.com/status/demo-org",
+                    "https://status-page-frontend.onrender.com/status/test-company",
+                ],
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "Demo data creation failed - check logs",
+            }
+
+    except Exception as e:
+        logger.error(f"Manual demo setup failed: {e}")
+        return {"status": "error", "message": f"Demo data creation failed: {str(e)}"}
 
 
 # Export the socket app as the main app for uvicorn

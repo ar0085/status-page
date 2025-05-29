@@ -22,4 +22,8 @@ services:
         value: https://status-page-frontend.onrender.com
       - key: ENVIRONMENT
         value: production
+      - key: CREATE_DEMO_DATA
+        value: true # Set to true for one-time demo data creation
+      - key: ALLOW_TEST_USERS
+        value: true # Allow test users for demo purposes
     healthCheckPath: /health

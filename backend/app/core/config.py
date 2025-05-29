@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     FRONTEND_URL: Optional[str] = None
     ALLOWED_ORIGINS: str = ""
 
+    # Demo data configuration
+    CREATE_DEMO_DATA: bool = (
+        False  # Set to true in production for one-time demo data creation
+    )
+    ALLOW_TEST_USERS: bool = False  # Allow test users in production
+
     def get_database_url(self) -> str:
         """Get database URL - prioritize DATABASE_URL env var for production"""
         if self.DATABASE_URL:
