@@ -66,35 +66,38 @@ const StatusPage = () => {
         setIsConnected(false);
       };
 
+      // Create a function to get the current refetch function
+      const getCurrentRefetch = () => refetch;
+
       const handleStatusUpdate = () => {
         console.log("Received generic status update, refetching data");
-        refetch();
+        getCurrentRefetch()();
       };
 
       // Specific event handlers for better performance
       const handleServiceUpdate = (data: Record<string, unknown>) => {
         console.log("Received service update:", data);
-        refetch(); // Refetch all data to update services, incidents, etc.
+        getCurrentRefetch()(); // Refetch all data to update services, incidents, etc.
       };
 
       const handleIncidentUpdate = (data: Record<string, unknown>) => {
         console.log("Received incident update:", data);
-        refetch(); // Refetch to update active incidents and overall status
+        getCurrentRefetch()(); // Refetch to update active incidents and overall status
       };
 
       const handleIncidentCreated = (data: Record<string, unknown>) => {
         console.log("Received incident created:", data);
-        refetch(); // Refetch to show new incident
+        getCurrentRefetch()(); // Refetch to show new incident
       };
 
       const handleMaintenanceUpdate = (data: Record<string, unknown>) => {
         console.log("Received maintenance update:", data);
-        refetch(); // Refetch to update maintenance information
+        getCurrentRefetch()(); // Refetch to update maintenance information
       };
 
       const handleMaintenanceCreated = (data: Record<string, unknown>) => {
         console.log("Received maintenance created:", data);
-        refetch(); // Refetch to show new maintenance
+        getCurrentRefetch()(); // Refetch to show new maintenance
       };
 
       // Set up event listeners
@@ -133,8 +136,8 @@ const StatusPage = () => {
       // Initial check
       setTimeout(checkConnection, 100); // Small delay to let connection establish
 
-      // Periodic check every 5 seconds
-      const connectionChecker = setInterval(checkConnection, 5000);
+      // Periodic check every 30 seconds (reduced from 5 seconds)
+      const connectionChecker = setInterval(checkConnection, 30000);
 
       // Subscribe if already connected
       if (socket.isConnected()) {
@@ -161,7 +164,7 @@ const StatusPage = () => {
         setIsConnected(false);
       };
     }
-  }, [orgSlug, statusData?.organization.id, refetch]);
+  }, [orgSlug, statusData?.organization.id]);
 
   const getStatusIcon = (status: ServiceStatus) => {
     switch (status) {
