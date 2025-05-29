@@ -14,6 +14,7 @@ from app.schemas.organization import (
 from app.services.organization_service import (
     get_user_by_clerk_id as _get_user_by_clerk_id,
 )
+from app.core.config import settings
 
 
 def get_team_members(db: Session, organization_id: int) -> List[TeamMember]:
@@ -282,10 +283,22 @@ async def send_invitation_email(email: str, token: str, organization_id: int) ->
     # This would integrate with your email service (SendGrid, AWS SES, etc.)
     # Email would contain a link like: http://yourapp.com/accept-invitation?token={token}
 
+    # Use environment-based frontend URL
+    if settings.FRONTEND_URL:
+        base_url = settings.FRONTEND_URL
+    elif settings.ENVIRONMENT == "production":
+        # Default production URL - update this to your actual frontend domain
+        base_url = "https://your-frontend-domain.onrender.com"
+    else:
+        # Development fallback
+        base_url = "http://localhost:5173"
+
+    invitation_link = f"{base_url}/accept-invitation?token={token}"
+
     # For now, log the invitation details to console
     print(f"\n🔔 INVITATION CREATED:")
     print(f"   Email: {email}")
     print(f"   Token: {token}")
-    print(f"   Invitation Link: http://localhost:5174/accept-invitation?token={token}")
+    print(f"   Invitation Link: {invitation_link}")
     print(f"   Organization ID: {organization_id}")
     print("   (In production, this would be sent via email)\n")

@@ -146,5 +146,35 @@ async def manual_database_init():
         }
 
 
+@app.get("/admin/debug/organizations")
+async def debug_organizations():
+    """Debug endpoint to list all organizations and their slugs."""
+    try:
+        from app.db.session import SessionLocal
+        from app.models.organization import Organization
+
+        db = SessionLocal()
+        try:
+            orgs = db.query(Organization).all()
+            return {
+                "total_organizations": len(orgs),
+                "organizations": [
+                    {
+                        "id": org.id,
+                        "name": org.name,
+                        "slug": org.slug,
+                        "created_at": (
+                            org.created_at.isoformat() if org.created_at else None
+                        ),
+                    }
+                    for org in orgs
+                ],
+            }
+        finally:
+            db.close()
+    except Exception as e:
+        return {"error": f"Failed to fetch organizations: {str(e)}"}
+
+
 # Export the socket app as the main app for uvicorn
 app = socket_app

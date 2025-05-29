@@ -17,42 +17,79 @@ const StatusPage = () => {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   const [isConnected, setIsConnected] = useState(false);
 
-  const { data: statusData, refetch } = useQuery<StatusPageResponse>({
+  const {
+    data: statusData,
+    refetch,
+    isLoading,
+    error,
+    isError,
+  } = useQuery<StatusPageResponse>({
     queryKey: ["public-status", orgSlug],
     queryFn: () => api.getPublicStatusPage(orgSlug!),
     enabled: !!orgSlug,
+    retry: 1, // Only retry once
   });
 
   // Fetch recent incidents for timeline
   const { data: recentIncidents } = useQuery({
     queryKey: ["public-timeline", orgSlug],
     queryFn: () => api.getPublicTimeline(orgSlug!, 5),
-    enabled: !!orgSlug,
+    enabled: !!orgSlug && !!statusData,
+    retry: 1,
   });
 
   // Fetch recent maintenance for timeline
   const { data: recentMaintenances } = useQuery({
     queryKey: ["public-maintenances", orgSlug],
     queryFn: () => api.getPublicMaintenances(orgSlug!, false),
-    enabled: !!orgSlug,
+    enabled: !!orgSlug && !!statusData,
+    retry: 1,
   });
 
   useEffect(() => {
     if (orgSlug && statusData?.organization.id) {
+      console.log(
+        `Connecting to WebSocket for organization ${statusData.organization.id}`
+      );
+
+      // Connect to socket
       socket.connect();
 
-      socket.on("connect", () => setIsConnected(true));
-      socket.on("disconnect", () => setIsConnected(false));
+      const handleConnect = () => {
+        console.log("Socket connected, subscribing to organization");
+        setIsConnected(true);
+        socket.subscribeToOrganization(statusData.organization.id);
+      };
 
-      socket.subscribeToOrganization(statusData.organization.id);
+      const handleDisconnect = (reason: string) => {
+        console.log("Socket disconnected:", reason);
+        setIsConnected(false);
+      };
 
-      socket.on("status_update", () => {
+      const handleStatusUpdate = () => {
+        console.log("Received status update, refetching data");
         refetch();
-      });
+      };
+
+      // Set up event listeners
+      socket.on("connect", handleConnect);
+      socket.on("disconnect", handleDisconnect);
+      socket.on("status_update", handleStatusUpdate);
+
+      // Subscribe if already connected
+      if (socket.isConnected()) {
+        socket.subscribeToOrganization(statusData.organization.id);
+        setIsConnected(true);
+      }
 
       return () => {
+        console.log("Cleaning up socket connection");
+        socket.off("connect", handleConnect);
+        socket.off("disconnect", handleDisconnect);
+        socket.off("status_update", handleStatusUpdate);
         socket.unsubscribeFromOrganization(statusData.organization.id);
         socket.disconnect();
+        setIsConnected(false);
       };
     }
   }, [orgSlug, statusData?.organization.id, refetch]);
@@ -93,6 +130,70 @@ const StatusPage = () => {
     statusData?.services.every((service) => service.status === "operational") ??
     true;
   const hasActiveIncidents = (statusData?.active_incidents?.length ?? 0) > 0;
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto" />
+          <p className="mt-4 text-gray-500 text-sm font-medium">
+            Loading status...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Handle error state (organization not found, network error, etc.)
+  if (isError || !statusData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <svg
+                className="h-6 w-6 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+            </div>
+            <h1 className="text-xl font-semibold text-gray-900 mb-2">
+              Status Page Not Found
+            </h1>
+            <p className="text-gray-600 mb-6">
+              {error?.message?.includes("404") ||
+              error?.message?.includes("not found")
+                ? `The organization "${orgSlug}" could not be found.`
+                : "There was an error loading the status page. Please try again later."}
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => refetch()}
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                Try Again
+              </button>
+              <a
+                href="/"
+                className="block w-full text-center bg-gray-100 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-200"
+              >
+                Go to Home
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!statusData) {
     return (

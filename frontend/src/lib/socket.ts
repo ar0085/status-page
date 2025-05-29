@@ -31,16 +31,26 @@ class SocketClient {
     this.socket = io(url, {
       autoConnect: false,
       transports: ["websocket"],
+      // Production-friendly options
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 20000,
     });
     this.listeners = new Map();
 
     // Set up reconnection handling
     this.socket.on("connect", () => {
-      console.log("Socket connected");
+      console.log("Socket connected to:", url);
     });
 
-    this.socket.on("disconnect", () => {
-      console.log("Socket disconnected");
+    this.socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
+    this.socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
     });
 
     // Set up event listeners
@@ -56,6 +66,10 @@ class SocketClient {
 
   disconnect() {
     this.socket.disconnect();
+  }
+
+  isConnected() {
+    return this.socket.connected;
   }
 
   subscribeToOrganization(organizationId: number) {

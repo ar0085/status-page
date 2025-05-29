@@ -18,4 +18,8 @@ services:
         generateValue: true
       - key: CLERK_SECRET_KEY
         sync: false # You'll set this manually
+      - key: FRONTEND_URL
+        value: https://your-frontend.onrender.com # Replace with your actual frontend URL
+      - key: ENVIRONMENT
+        value: production
     healthCheckPath: /health

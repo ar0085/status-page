@@ -3,6 +3,8 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { routes } from "../../lib/routes";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
 interface InvitationDetails {
   email: string;
   role: string;
@@ -31,9 +33,7 @@ const AcceptInvitation: React.FC = () => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/team/invitation/${token}`
-        );
+        const response = await fetch(`${API_URL}/api/team/invitation/${token}`);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -82,19 +82,16 @@ const AcceptInvitation: React.FC = () => {
       setAccepting(true);
 
       try {
-        const response = await fetch(
-          "http://localhost:8000/api/team/accept-invitation",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              token: token,
-              clerk_user_id: user.id,
-            }),
-          }
-        );
+        const response = await fetch(`${API_URL}/api/team/accept-invitation`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: token,
+            clerk_user_id: user.id,
+          }),
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
