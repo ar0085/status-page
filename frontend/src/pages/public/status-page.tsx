@@ -669,27 +669,32 @@ const StatusPage = () => {
         </footer>
       </main>
 
-      {/* Live Connection Indicator - Dev Only */}
-      {import.meta.env.DEV && (
-        <div className="fixed bottom-5 right-5 z-50">
-          <div
-            className={`flex items-center space-x-2 rounded-full border px-4 py-2 text-xs font-semibold shadow-md ${
-              isConnected
-                ? "bg-green-100 border-green-300 text-green-700"
-                : "bg-red-100 border-red-300 text-red-700"
+      {/* Live Connection Indicator - Shows in production for debugging */}
+      <div className="fixed bottom-5 right-5 z-50">
+        <div
+          className={`flex items-center space-x-2 rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm transition-all duration-200 ${
+            isConnected
+              ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
+              : "bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
+          } ${
+            import.meta.env.DEV
+              ? "shadow-md px-4 py-2 font-semibold"
+              : "opacity-75 hover:opacity-100"
+          }`}
+          aria-live="polite"
+          aria-atomic="true"
+          title={`WebSocket connection status: ${
+            isConnected ? "Connected" : "Disconnected"
+          }`}
+        >
+          <span
+            className={`inline-block h-2 w-2 rounded-full ${
+              isConnected ? "bg-green-600" : "bg-red-600"
             }`}
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            <span
-              className={`inline-block h-2 w-2 rounded-full ${
-                isConnected ? "bg-green-600" : "bg-red-600"
-              }`}
-            />
-            <span>{isConnected ? "Live" : "Disconnected"}</span>
-          </div>
+          />
+          <span>{isConnected ? "Live" : "Disconnected"}</span>
         </div>
-      )}
+      </div>
     </div>
   );
 };
