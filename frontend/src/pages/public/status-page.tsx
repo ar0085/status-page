@@ -109,14 +109,45 @@ const StatusPage = () => {
       socket.on("maintenance_update", handleMaintenanceUpdate);
       socket.on("maintenance_created", handleMaintenanceCreated);
 
+      // Check initial connection status and set up periodic checks
+      const checkConnection = () => {
+        const connected = socket.isConnected();
+        console.log(
+          `Connection check: socket.isConnected() = ${connected}, current state = ${isConnected}`
+        );
+
+        if (connected && !isConnected) {
+          console.log(
+            "Socket is connected but state shows disconnected - fixing state"
+          );
+          setIsConnected(true);
+          socket.subscribeToOrganization(statusData.organization.id);
+        } else if (!connected && isConnected) {
+          console.log(
+            "Socket is disconnected but state shows connected - fixing state"
+          );
+          setIsConnected(false);
+        }
+      };
+
+      // Initial check
+      setTimeout(checkConnection, 100); // Small delay to let connection establish
+
+      // Periodic check every 5 seconds
+      const connectionChecker = setInterval(checkConnection, 5000);
+
       // Subscribe if already connected
       if (socket.isConnected()) {
+        console.log(
+          "Socket already connected on mount, subscribing immediately"
+        );
         socket.subscribeToOrganization(statusData.organization.id);
         setIsConnected(true);
       }
 
       return () => {
         console.log("Cleaning up socket connection");
+        clearInterval(connectionChecker);
         socket.off("connect", handleConnect);
         socket.off("disconnect", handleDisconnect);
         socket.off("status_update", handleStatusUpdate);
@@ -710,7 +741,7 @@ const StatusPage = () => {
       {/* Live Connection Indicator - Shows in production for debugging */}
       <div className="fixed bottom-5 right-5 z-50">
         <div
-          className={`flex items-center space-x-2 rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm transition-all duration-200 ${
+          className={`flex items-center space-x-2 rounded-full border px-3 py-1.5 text-xs font-medium shadow-sm transition-all duration-200 cursor-pointer ${
             isConnected
               ? "bg-green-50 border-green-200 text-green-700 hover:bg-green-100"
               : "bg-red-50 border-red-200 text-red-700 hover:bg-red-100"
@@ -723,14 +754,41 @@ const StatusPage = () => {
           aria-atomic="true"
           title={`WebSocket connection status: ${
             isConnected ? "Connected" : "Disconnected"
-          }`}
+          }${import.meta.env.DEV ? " (Click to check connection)" : ""}`}
+          onClick={() => {
+            if (import.meta.env.DEV) {
+              const socketConnected = socket.isConnected();
+              console.log("🔍 Manual Connection Check:");
+              console.log("  - socket.isConnected():", socketConnected);
+              console.log("  - React state isConnected:", isConnected);
+              console.log("  - Organization ID:", statusData?.organization.id);
+
+              if (socketConnected && !isConnected) {
+                console.log("  - Fixing state: Setting isConnected to true");
+                setIsConnected(true);
+                if (statusData?.organization.id) {
+                  socket.subscribeToOrganization(statusData.organization.id);
+                }
+              } else if (!socketConnected && isConnected) {
+                console.log("  - Fixing state: Setting isConnected to false");
+                setIsConnected(false);
+              }
+            }
+          }}
         >
           <span
             className={`inline-block h-2 w-2 rounded-full ${
               isConnected ? "bg-green-600" : "bg-red-600"
             }`}
           />
-          <span>{isConnected ? "Live" : "Disconnected"}</span>
+          <span>
+            {isConnected ? "Live" : "Disconnected"}
+            {import.meta.env.DEV && (
+              <span className="ml-1 opacity-60">
+                (ID: {statusData?.organization.id})
+              </span>
+            )}
+          </span>
         </div>
       </div>
     </div>

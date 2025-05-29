@@ -2,7 +2,7 @@ services:
   - type: web
     name: status-page-backend
     env: python
-    repo: https://github.com/yourusername/status-page.git # Replace with your GitHub repo URL
+    repo: https://github.com/ar0085/status-page
     rootDir: ./backend
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
@@ -19,7 +19,7 @@ services:
       - key: CLERK_SECRET_KEY
         sync: false # You'll set this manually
       - key: FRONTEND_URL
-        value: https://your-frontend.onrender.com # Replace with your actual frontend URL
+        value: https://status-page-frontend.onrender.com
       - key: ENVIRONMENT
         value: production
     healthCheckPath: /health
