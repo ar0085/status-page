@@ -67,14 +67,47 @@ const StatusPage = () => {
       };
 
       const handleStatusUpdate = () => {
-        console.log("Received status update, refetching data");
+        console.log("Received generic status update, refetching data");
         refetch();
+      };
+
+      // Specific event handlers for better performance
+      const handleServiceUpdate = (data: Record<string, unknown>) => {
+        console.log("Received service update:", data);
+        refetch(); // Refetch all data to update services, incidents, etc.
+      };
+
+      const handleIncidentUpdate = (data: Record<string, unknown>) => {
+        console.log("Received incident update:", data);
+        refetch(); // Refetch to update active incidents and overall status
+      };
+
+      const handleIncidentCreated = (data: Record<string, unknown>) => {
+        console.log("Received incident created:", data);
+        refetch(); // Refetch to show new incident
+      };
+
+      const handleMaintenanceUpdate = (data: Record<string, unknown>) => {
+        console.log("Received maintenance update:", data);
+        refetch(); // Refetch to update maintenance information
+      };
+
+      const handleMaintenanceCreated = (data: Record<string, unknown>) => {
+        console.log("Received maintenance created:", data);
+        refetch(); // Refetch to show new maintenance
       };
 
       // Set up event listeners
       socket.on("connect", handleConnect);
       socket.on("disconnect", handleDisconnect);
       socket.on("status_update", handleStatusUpdate);
+
+      // Listen for specific event types
+      socket.on("service_update", handleServiceUpdate);
+      socket.on("incident_update", handleIncidentUpdate);
+      socket.on("incident_created", handleIncidentCreated);
+      socket.on("maintenance_update", handleMaintenanceUpdate);
+      socket.on("maintenance_created", handleMaintenanceCreated);
 
       // Subscribe if already connected
       if (socket.isConnected()) {
@@ -87,6 +120,11 @@ const StatusPage = () => {
         socket.off("connect", handleConnect);
         socket.off("disconnect", handleDisconnect);
         socket.off("status_update", handleStatusUpdate);
+        socket.off("service_update", handleServiceUpdate);
+        socket.off("incident_update", handleIncidentUpdate);
+        socket.off("incident_created", handleIncidentCreated);
+        socket.off("maintenance_update", handleMaintenanceUpdate);
+        socket.off("maintenance_created", handleMaintenanceCreated);
         socket.unsubscribeFromOrganization(statusData.organization.id);
         socket.disconnect();
         setIsConnected(false);
